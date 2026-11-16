@@ -1,0 +1,61 @@
+name: api-autenticacao
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: bd-autenticacao
+      MYSQL_USER: software
+      MYSQL_PASSWORD: software
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - autenticacao_network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql --host=127.0.0.1 --user="$$MYSQL_USER" --database="$$MYSQL_DATABASE" --execute="SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: "3306"
+      PMA_USER: software
+      PMA_PASSWORD: software
+    ports:
+      - "5053:80"
+    volumes:
+      - phpmyadmin_sessions:/sessions
+    networks:
+      - autenticacao_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - php
+        - -r
+        - "exit(@file_get_contents('http://127.0.0.1/') === false ? 1 : 0);"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_data:
+  phpmyadmin_sessions:
+
+networks:
+  autenticacao_network:
+    driver: bridge
