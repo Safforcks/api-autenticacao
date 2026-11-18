@@ -2,6 +2,7 @@ package br.com.software.api_autenticacao.services;
 
 import br.com.software.api_autenticacao.dtos.CriarUsuarioRequest;
 import br.com.software.api_autenticacao.dtos.CriarUsuarioResponse;
+import br.com.software.api_autenticacao.entities.Perfil;
 import br.com.software.api_autenticacao.entities.Usuario;
 import br.com.software.api_autenticacao.repositories.PerfilRepository;
 import br.com.software.api_autenticacao.repositories.UsuarioRepository;
@@ -25,10 +26,29 @@ public class UsuarioService {
 
     // Método para implementar o fluxo de cadastro do usuário
     public CriarUsuarioResponse criarUsuario(CriarUsuarioRequest request) {
+
+        // Verificar se o email já está cadastrado no banco de dados
+        if (usuarioRepository.findByEmail(request.email()) != null) {
+            throw new IllegalArgumentException("O email informado já está cadastrado. Tente outro.");
+        }
+
         var usuario = new Usuario();
         usuario.setNome(request.nome());
         usuario.setEmail(request.email());
         usuario.setSenha(criptografarSenha(request.senha()));
+
+        // Todo usuário que se cadastrar será vinculado a um perfil chamado "Operador"
+        var perfil = perfilRepository.findByNome("Operador");
+
+        // Se o perfil não existir, iremos cadastrá-lo
+        if (perfil == null) {
+            perfil = new Perfil();
+            perfil.setNome("Operador");
+            perfilRepository.save(perfil);
+        }
+
+        // Associar o usuário ao perfil operador
+        usuario.setPerfil(perfil);
 
         usuarioRepository.save(usuario);
 
