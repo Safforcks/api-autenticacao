@@ -8,7 +8,11 @@ import br.com.software.api_autenticacao.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 
 @Service
 public class UsuarioService {
@@ -24,7 +28,7 @@ public class UsuarioService {
         var usuario = new Usuario();
         usuario.setNome(request.nome());
         usuario.setEmail(request.email());
-        usuario.setSenha(request.senha());
+        usuario.setSenha(criptografarSenha(request.senha()));
 
         usuarioRepository.save(usuario);
 
@@ -41,4 +45,16 @@ public class UsuarioService {
     // Método para implementar o fluxo de autenticação do usuário
     public void autenticarUsuario() {}
 
+    // Método privado auxiliar para fazer a criptografia da senha do usuário
+    private String criptografarSenha(String senha) {
+        try {
+            MessageDigest algoritmo = MessageDigest.getInstance("SHA-256");
+            byte[] hash = algoritmo.digest(senha.getBytes(StandardCharsets.UTF_8)
+            );
+
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 não disponível.", e);
+        }
+    }
 }
