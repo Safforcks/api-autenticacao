@@ -1,9 +1,12 @@
 package br.com.software.api_autenticacao.services;
 
+import br.com.software.api_autenticacao.dtos.AutenticarUsuarioRequest;
+import br.com.software.api_autenticacao.dtos.AutenticarUsuarioResponse;
 import br.com.software.api_autenticacao.dtos.CriarUsuarioRequest;
 import br.com.software.api_autenticacao.dtos.CriarUsuarioResponse;
 import br.com.software.api_autenticacao.entities.Perfil;
 import br.com.software.api_autenticacao.entities.Usuario;
+import br.com.software.api_autenticacao.exceptions.AcessoNegadoExpection;
 import br.com.software.api_autenticacao.exceptions.EmailJaCadastradoException;
 import br.com.software.api_autenticacao.repositories.PerfilRepository;
 import br.com.software.api_autenticacao.repositories.UsuarioRepository;
@@ -64,7 +67,23 @@ public class UsuarioService {
     }
 
     // Método para implementar o fluxo de autenticação do usuário
-    public void autenticarUsuario() {}
+    public AutenticarUsuarioResponse autenticarUsuario(AutenticarUsuarioRequest request) {
+        var usuario = usuarioRepository.findByEmail(request.email());
+
+        if (usuario != null && usuario.getSenha().equals(criptografarSenha(request.senha()))) {
+            return new AutenticarUsuarioResponse(
+                    "Usuário autenticado com sucesso.",
+                    usuario.getId(),
+                    usuario.getNome(),
+                    usuario.getEmail(),
+                    usuario.getPerfil().getNome(),
+                    LocalDateTime.now(),
+                    "" //Todo implementar a geração do TOKEN JWT
+            );
+        } else {
+            throw new AcessoNegadoExpection();
+        }
+    }
 
     // Método privado auxiliar para fazer a criptografia da senha do usuário
     private String criptografarSenha(String senha) {
