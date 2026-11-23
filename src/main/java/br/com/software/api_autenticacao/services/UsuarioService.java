@@ -4,6 +4,7 @@ import br.com.software.api_autenticacao.dtos.CriarUsuarioRequest;
 import br.com.software.api_autenticacao.dtos.CriarUsuarioResponse;
 import br.com.software.api_autenticacao.entities.Perfil;
 import br.com.software.api_autenticacao.entities.Usuario;
+import br.com.software.api_autenticacao.exceptions.EmailJaCadastradoException;
 import br.com.software.api_autenticacao.repositories.PerfilRepository;
 import br.com.software.api_autenticacao.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class UsuarioService {
 
         // Verificar se o email já está cadastrado no banco de dados
         if (usuarioRepository.findByEmail(request.email()) != null) {
-            throw new IllegalArgumentException("O email informado já está cadastrado. Tente outro.");
+            throw new EmailJaCadastradoException();
         }
 
         var usuario = new Usuario();
