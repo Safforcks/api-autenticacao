@@ -11,15 +11,16 @@ public record CriarUsuarioRequest(
         @NotBlank(message = "O nome do usuário é obrigatório.")
         String nome,
 
-        @Email(message = "Informa um endereço de email válido.")
+        @Email(message = "Informe um endereço de email válido.")
         @NotBlank(message = "O email do usuário é obrigatório.")
         String email,
 
         @Pattern(
-                regexp = "(?=.*\\\\p{Ll})(?=.*\\\\p{Lu})(?=.*[0-9])(?=.*[\\\\p{P}\\\\p{S}])\\\\S{8,}",
-                message = "A senha deve conter pelo menos 1 letra minúscula, 1 maiúscula, 1 número, 1 caractere especial e pelo menos 8 caractes."
+                regexp = "(?=.*\\p{Ll})(?=.*\\p{Lu})(?=.*[0-9])(?=.*[\\p{P}\\p{S}])\\S{8,}",
+                message = "A senha deve conter pelo menos 1 letra minúscula, 1 letra maiúscula, 1 número, 1 caractere especial e pelo menos 8 caracteres."
         )
         @NotBlank(message = "A senha do usuário é obrigatória.")
         String senha
 ) {
 }
+
