@@ -1,6 +1,8 @@
 package br.com.software.api_autenticacao.handlers;
 
+import br.com.software.api_autenticacao.exceptions.AcessoNegadoExpection;
 import br.com.software.api_autenticacao.exceptions.EmailJaCadastradoException;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +19,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErroResponse handleEmailJaCadastrado(EmailJaCadastradoException e) {
         return new ErroResponse("email", e.getMessage());
+    }
+
+    @ExceptionHandler(AcessoNegadoExpection.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErroResponse handleAcessoNegado(AcessoNegadoExpection e) {
+        return new ErroResponse("erro", e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
