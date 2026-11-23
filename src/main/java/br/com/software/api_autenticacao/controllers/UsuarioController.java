@@ -18,14 +18,9 @@ public class UsuarioController {
 
     @PostMapping("criar")
     public ResponseEntity<?> criar(@RequestBody CriarUsuarioRequest request) {
-        try {
             var response = usuarioService.criarUsuario(request);
             //HTTP 201 - CREATED
             return ResponseEntity.status(201).body(response);
-        } catch (Exception e) {
-            //HTTP 500 - INTERNAL SERVER ERROR
-            return ResponseEntity.status(500).body(e.getMessage());
-        }
     }
 
     @PostMapping("autenticar")
