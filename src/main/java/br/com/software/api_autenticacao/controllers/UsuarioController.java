@@ -1,5 +1,6 @@
 package br.com.software.api_autenticacao.controllers;
 
+import br.com.software.api_autenticacao.dtos.AutenticarUsuarioRequest;
 import br.com.software.api_autenticacao.dtos.CriarUsuarioRequest;
 import br.com.software.api_autenticacao.services.UsuarioService;
 import jakarta.validation.Valid;
@@ -25,7 +26,9 @@ public class UsuarioController {
     }
 
     @PostMapping("autenticar")
-    public ResponseEntity<?> autenticar() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> autenticar(@RequestBody @Valid AutenticarUsuarioRequest request) {
+        var response = usuarioService.autenticarUsuario(request);
+        //HTTP 200 - OK
+        return ResponseEntity.status(200).body(response);
     }
 }
