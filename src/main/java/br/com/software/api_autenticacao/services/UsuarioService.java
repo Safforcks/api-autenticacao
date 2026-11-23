@@ -10,13 +10,17 @@ import br.com.software.api_autenticacao.exceptions.AcessoNegadoExpection;
 import br.com.software.api_autenticacao.exceptions.EmailJaCadastradoException;
 import br.com.software.api_autenticacao.repositories.PerfilRepository;
 import br.com.software.api_autenticacao.repositories.UsuarioRepository;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HexFormat;
 
 @Service
@@ -78,7 +82,7 @@ public class UsuarioService {
                     usuario.getEmail(),
                     usuario.getPerfil().getNome(),
                     LocalDateTime.now(),
-                    "" //Todo implementar a geração do TOKEN JWT
+                    gerarToken(usuario)
             );
         } else {
             throw new AcessoNegadoExpection();
@@ -96,5 +100,21 @@ public class UsuarioService {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 não disponível.", e);
         }
+    }
+
+    // Método privado auxiliar para gerar um TOKEN JWT
+    private String gerarToken(Usuario usuario) {
+        var chaveAssinatura = "da7a8711-7a4f-426f-a025-201806c660c9";
+
+        Instant agora = Instant.now();
+        Instant dataExpiracao = agora.plusMillis(360000);
+
+        return Jwts.builder()
+                .setSubject(usuario.getEmail()) //Usuário que gerou o TOKEN JWT
+                .claim("role", usuario.getPerfil().getNome()) //Perfil do usuário
+                .setIssuedAt(Date.from(agora)) //Data e hora de geração do TOKEN
+                .setExpiration(Date.from(dataExpiracao)) //Data de exíração do token
+                .signWith(SignatureAlgorithm.HS256, chaveAssinatura) //Chave secreta para criptografia
+                .compact(); //Retornar o TOKEN
     }
 }
