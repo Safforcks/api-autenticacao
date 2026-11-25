@@ -1,5 +1,6 @@
 package br.com.software.api_autenticacao;
 
+import com.github.javafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,14 +29,20 @@ class ApiAutenticacaoApplicationTests {
 	@Test
 	@DisplayName("TS01 - Deve criar um usuário com sucesso na API.")
 	void deveCriarUsuarioComSucesso() throws Exception {
+		var faker = new Faker(new Locale("pt-BR"));
+
+		var nome = faker.name().fullName();
+		var email = faker.internet().emailAddress();
+		System.out.println("[TS01] - Nome gerado: " + nome + " | Email gerado: " + email);
+
 		// ARRANGE
 		var request = """
 				{
-					"nome": "João Pedro",
-					"email": "joão@gmail.com",
-					"senha": "João123*"
+					"nome": "%s",
+					"email": "%s",
+					"senha": "Admin123*"
 				}
-				""";
+				""".formatted(nome, email);
 
 		// ACT
 		var response = mockMvc.perform(post("/api/v1/usuario/criar")
@@ -44,8 +53,8 @@ class ApiAutenticacaoApplicationTests {
 		// ASSERT
 		response.andExpect(status().isCreated());
 		response.andExpect(jsonPath("$.mensagem").value("Usuário cadastrado com sucesso"));
-		response.andExpect(jsonPath("$.nome").value("João Pedro"));
-		response.andExpect(jsonPath("$.email").value("joão@gmail.com"));
+		response.andExpect(jsonPath("$.nome").value(nome));
+		response.andExpect(jsonPath("$.email").value(email));
 		response.andExpect(jsonPath("$.perfil").value("Operador"));
 	}
 
